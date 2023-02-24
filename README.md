@@ -2,6 +2,9 @@
  A few reinforcement learning agent demonstrations, including AlphaGoZero, 
  Proximal Policy Optimization, and Q learning.
 
+### The games
+![](IntroToGames.jpg)
+
 ## Contents
 1. The **MCTS-AlphaGoZero** folder contains an implementation of the AlphaGoZero algorithm 
 on a 9x9 Go board, but otherwise using essentially all aspects of the original paper (https://doi.org/10.1038/nature24270).
@@ -17,6 +20,7 @@ on a 9x9 Go board, but otherwise using essentially all aspects of the original p
    1. **Pong-Agent** is a simple implementation solving the game Pong (two players bounce a ball back and forth
    and try to not let it go out the end of the board).
    2. **Cartpole-Agent** is a simple network that learns to balance an inverted pendulum.
+
 
 ## How to run each example
 
