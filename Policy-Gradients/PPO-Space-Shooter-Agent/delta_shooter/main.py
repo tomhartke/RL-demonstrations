@@ -368,7 +368,7 @@ def choose_move(
 
 if __name__ == "__main__":
 
-    training = False
+    training = True
 
     # Example workflow, feel free to edit this! ###
     if training:
