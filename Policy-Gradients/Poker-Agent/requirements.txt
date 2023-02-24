@@ -1,8 +1,8 @@
-numpy
+numpy~=1.24.2
 pygame
 tqdm
 delta-utils>=0.0.14
 git+https://github.com/Delta-Academy/rlcard.git
-# Torch
---find-links https://download.pytorch.org/whl/torch_stable.html
-torch==1.8.0+cpu
+torch
+tensorboard
+setuptools~=60.2.0

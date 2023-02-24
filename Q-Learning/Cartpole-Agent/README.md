@@ -1,5 +1,14 @@
 # Cartpole-Agent
 
+## Cartpole visualization
+
+![The basic setup of Pong.](./docs/CartpolePicture.jpg)
+Cartpole is a game which tries to balance a stick on a pivot point
+by moving the base of the pivot side to side.
+
+
+## Details
+
 The Cartpole-Agent implements Q learning.
 More specifically it includes:
 - Deep Q learning (double network for slowing down the update rate)

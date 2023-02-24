@@ -25,7 +25,12 @@ Each example is generally structured in two stages:
 2. Evaluation: the agent can be run, either in self play, or against a human opponent.
 
 To run each agent, you will likely need to follow the following steps:
-- Install the relevant packages in python.
+- Set up a local version and install the relevant packages in python.
+  - I've been using Pycharm with a local virtual environment. 
+  - Relevant packages include: torch, numpy, tqdm, tensorboard, pygame
+  - In pycharm, you can create a virtual environment, then sync the packages in the "requirements.txt" file
+  in a few ways. Generally the relevant packages can be found in 
+  the requirements.txt file of each folder.
 - Set up the files for either training or evaluation of a trained model.
 - Run something like "main.py"
 - For details, see the README.md files within each subfolder.

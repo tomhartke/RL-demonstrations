@@ -2,6 +2,12 @@
 
 The Pong-Agent implements Q learning with Deep Q networks and experience replay.
 
+## Pong game visualization
+
+![The basic setup of Pong.](./images/pongGame.jpeg)
+
+## Details
+
 For this agent, all training was done in a Jupyter notebook called "main.ipynb". 
 - Following through this jupyter notebook, you will see that there is a set of cells for 
   - initializing and training the network, followed by 

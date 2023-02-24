@@ -2,3 +2,7 @@ numpy
 pygame
 tqdm
 delta-utils>=0.1.0
+torch
+tqdm
+scipy
+tensorboard

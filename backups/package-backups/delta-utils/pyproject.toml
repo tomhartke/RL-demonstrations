@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "delta-utils"
+version = "0.1.1"
+authors = [
+  { name="neuromantic99", email="james@learney.me" },
+]
+description = "Utility tools for Delta Academy tournaments"
+
+readme = "README.md"
+license = "GPL-3.0-only"
+requires-python = ">=3.8"
+dependencies = [ "dirhash" ]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.scripts]
+hash-game-mechanics = "delta_utils.hash_game_mechanics:main"
+
+[project.urls]
+"Homepage" = "https://github.com/Delta-Academy/delta-utils/"
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39']
+exclude = '''
+/(
+    competitor_code/team_[0-9]*\.py
+    venv.*
+    \.eggs
+  | \.git
+  | \.mypy_cache
+)/
+'''
