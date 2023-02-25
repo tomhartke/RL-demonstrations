@@ -94,21 +94,28 @@ Past games are sampled in a random way (bootstrapping) and trained repeatedly.
 
 ### Pitfalls 
 I originally masked out illegal actions wrong, forcing bad actions. 
-I originally made it only possible to pass when there are 0 other options. 
+Specifically, I originally made it only possible to pass when there are 0 other options. 
 This is bad because there needs to be a way for the game to end so that we aren’t 
-forced to fill in our own squares. If we fill in our own squares, that can remove protection and cause random loss.
+forced to fill in our own squares (sometimes passing is optimal, when you have an option to play). 
+If we fill in our own squares because we're forced to not pass, that can remove protection from being 
+surrounded by the opponent (removing "eyes" in the language of Go) and 
+cause the final outcome of the game to be pretty random (basically whoever happens to win once all eyes are filled). 
+This prevents effective training. 
 
-Be careful about signs of terms in the game mechanics (who is which player, and what perspective
-is the reward evaluated from). Similarly, be careful about sign flips in the MCTS perspective. 
+One must be careful about signs of terms in the game mechanics (who is which player, and what perspective
+is the reward evaluated from). Similarly, one has to be careful about 
+sign flips in the MCTS perspective when choosing which action to take in simulated planning. 
 
-I think it's good to predict the actual action probabilities of the network, rather than discrete action chosen
+I found it was useful to predict the actual action probabilities of the network, rather than discrete action actually chosen
 (which depends on whether we have a high temperature or a low temperature for the conversion of MCTS visit count 
 to action probability). This ensures that we learn to act more randomly at the beginning of the game 
 (because of the added dirichlet noise) rather than converging to some randomly chosen initial action 
-via the policy network.
+via the policy network. It also seems necessary to add the Dirichlet noise only to the set of masked possible
+actions (not to all 82 possible actions equally). This ensures you get more randomization/search later in the game,
+as the set of available options dwindles (and therefore each gets more relative noise).
 
 The PUCT exploration coefficient is very important. I noticed that having it too high freezes in 
-the original (random) policy, since you only explore the existing policy. That is not good. 
+the original (random) policy, since the exploration term in MCTS always dominates, and you only explore the existing policy. That is not good. 
 A higher level description of why this happens can be found in this paper (https://arxiv.org/abs/2007.12509),
 which describes the AGZ MCTS algorithm as regularized tree search, with a penalty for deviating from the policy network
 (and the coefficient of that penalty is the PUCT coefficient, roughly, so that high 
@@ -124,49 +131,61 @@ node class to reduce computation time.
 It is useful to improve sample efficiency by reflecting/flipping the boards during training, and treating
 that as independent samples. 
 
-Be careful about sampling the games too much. Your action samples need to be pretty independent 
+Be careful about sampling the games too much so that samples are correlated. 
+Your action samples need to be pretty independent 
 to avoid collapsing the policy to suboptimal things. 
 For example, I ended up using batch training over last 15 games to get more uncorrelated 
-samples for training, and then trained every 5 games on 2.5 games worth of data 
+samples for training, and then trained every 5 games on 2.5 games worth of data. 
 
 A good way to debug is to: 
-Print which player the bot is (black or white) and predicted Q of action while watching games run
-Seeing it correlate with visual swings up or down in game shows learning. 
+Print which player the bot is (black or white) and predicted Q value of the chosen action after MCTS, 
+while watching games run in real time.
+Seeing this predicted value correlate with visual swings up or down in who will win the game shows learning. 
 
 
 ### Suggestions for steps to rebuild this code from scratch
+Here is a list of the steps I planned to take and eventually took, 
+roughly in order, to build this code. 
+
 I started with the basic game mechanics, then just made sure that behaved correctly given the outputs of the network.
-1. Then I set up value function training just based on the outcome of random games. 
-2. Then I set up MCTS to get a slightly improved policy (and could see that improved things). Just use UCT algorithm at first.
-3. Then I set up the policy network to predict the action given past data from games. 
-4. Then I added the policy network into the MCTS algorithm. 
+1. Then I set up value function training just based on the outcome of random games (and checked slight learning). 
+2. Then I set up MCTS to get a slightly improved policy (and could see that improved things). 
+I just used the UCT algorithm at first, instead of policy-guided UCT.
+3. Then I set up the policy network to predict the action given past data from games (and checked learning). 
+4. Then I added the policy network into the MCTS algorithm to guide search. 
 5. Then I made the opponent pool and checkpointing past versions of self.
 6. Then I made sure the runtime wasn't particularly bad on a GPU.
-7. Then I tuned the hyperparameters to optimize learning.
-    * Gamma for reward decay within episodes
-    * PUCT exploration constant 
-    * Network structure (depth and kernel number)
-    * Learning rates. Annealing of learning rate?
-    * L2 regularization during learning 
-    * Number of rollouts during training
+7. Then I tuned the hyperparameters to optimize learning, including:
+    * Gamma for reward decay within episodes (not important, though at one point it seemed that large decay helped, 
+   since it reduced variance in the early-game learned predicted reward.)
+    * PUCT exploration constant (not too large, or random policy freezes)
+    * Network structure (depth and kernel number, wasn't too important)
+    * Learning rates (didn't explore significantly, perhas I should be annealing of learning rate?)
+    * L2 regularization during learning (didn't explore significantly)
+    * Number of rollouts during training (must be long, even if it's slow, otherwise there's no policy 
+   improvement loop through self play)
     * Exploration rate during training 
-      * Temperature for exploration of first N plays. Maybe 8 for us, since board is 4 times smaller? 
-      * Noise level for noise added to policy network root node during mcts
-    * Batch size for training (how many games between training sessions)
-    * Self play number of games before checkpoint?
-    * Exploration constant of opponent pool? 
+      * Temperature for exploration of first N plays (didn't explore much) 
+      * Noise level for noise added to policy network root node during mcts (didn't explore much)
+    * Batch size for training (how many games between training sessions) (has to be sufficiently non-correlated samples)
+    * Self play number of games before checkpoint (didn't explore much)
+    * Exploration constant of opponent pool (didn't explore much)
 
 ### Future optimization
 Probably the biggest gain would be to train longer and parallelize the training process (more games).
 The original AGZ paper had 5 million training games (I think implying 1500 games run in parallel over 3 days).
 I only had a few hundred training games (since each takes a minute or two).
 
-I didn't get a chance to really explore hyperparameter optimization. 
+I didn't get a chance to really explore hyperparameter optimization. Probably the best approaches are: 
 * Try learning rate decay 
 * Try adjusted puct coefficient
 * Try adjusting rollout number 
-* Maybe more fully connected value neurons?
+* Maybe more fully connected value neurons in the value head of the network
 * Deeper network (more layers or more kernels)
 
-Agent still hasn't learned to block opponent, 
-or to connect its guys when it would be optimal?
+There's definitely still room for improvement, since 
+visual inspection/play against human shows that the agent still 
+hasn't learned to block the opponent in crucial situations, or to 
+connect it's own groups when crucial (likely these phenomena are correlated, since within
+the self-play framework, there's no feedback for them to learn to block the opponent (which is themselves) until
+the opponent learns to make crucial connection moves).
