@@ -1,3 +1,9 @@
 MCTS-AlphaGoZero/Go-Agent/venv
 Policy-Gradients/Poker-Agent/venv
 Policy-Gradients/PPO-Space-Shooter-Agent/venv
+.DS_Store
+MCTS-AlphaGoZero/Go-Agent/.DS_Store
+MCTS-AlphaGoZero/Go-Agent/.idea/
+MCTS-AlphaGoZero/Go-Agent/.DS_Store
+Q-Learning/.DS_Store
+Policy-Gradients/.DS_Store
